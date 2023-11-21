@@ -1,5 +1,10 @@
 package CountMinSketch
 
+import (
+	"bytes"
+	"encoding/gob"
+)
+
 type CountMinSketch struct {
 	m             uint           //kolone
 	k             uint           //redovi
@@ -54,4 +59,31 @@ func (cms CountMinSketch) getFrequency(K []byte) uint64 {
 	}
 
 	return minNum
+}
+
+func (cms *CountMinSketch) GobEncode() ([]byte, error) {
+	var buffer bytes.Buffer
+	encoder := gob.NewEncoder(&buffer)
+
+	err := encoder.Encode(cms)
+	if err != nil {
+		panic("Error while encoding")
+	}
+
+	return buffer.Bytes(), nil
+}
+
+func GobDecode(data []byte) *CountMinSketch {
+	var buffer bytes.Buffer
+	decoder := gob.NewDecoder(&buffer)
+
+	buffer.Write(data)
+
+	cms := &CountMinSketch{}
+	err := decoder.Decode(cms)
+	if err != nil {
+		panic("Error while decoding")
+	}
+
+	return cms
 }
